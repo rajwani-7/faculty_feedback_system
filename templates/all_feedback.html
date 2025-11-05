@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}All Student Feedback - Faculty Feedback System{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg shadow-xl p-6 mb-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-white mb-2">
+                All Student Feedback
+            </h1>
+            <p class="text-purple-100 mb-4">
+                Complete feedback details with student information
+            </p>
+            <div class="flex justify-center space-x-4">
+                <a href="{{ url_for('admin_dashboard') }}" 
+                   class="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-purple-50 transition duration-300">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <div class="text-2xl font-bold text-blue-600 mb-2">{{ feedback_list|length }}</div>
+            <div class="text-sm text-gray-600">Total Feedback</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <div class="text-2xl font-bold text-green-600 mb-2">
+                {{ feedback_list|map(attribute='student_name')|unique|list|length }}
+            </div>
+            <div class="text-sm text-gray-600">Students Participated</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <div class="text-2xl font-bold text-purple-600 mb-2">
+                {{ feedback_list|map(attribute='faculty_name')|unique|list|length }}
+            </div>
+            <div class="text-sm text-gray-600">Faculty Evaluated</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <div class="text-2xl font-bold text-orange-600 mb-2">
+                {% if feedback_list %}
+                    {{ "%.2f"|format((feedback_list|map(attribute='performance')|sum + feedback_list|map(attribute='knowledge')|sum + feedback_list|map(attribute='teaching_skills')|sum + feedback_list|map(attribute='communication')|sum + feedback_list|map(attribute='behavior')|sum) / (feedback_list|length * 5)) }}
+                {% else %}
+                    0.00
+                {% endif %}
+            </div>
+            <div class="text-sm text-gray-600">Overall Average</div>
+        </div>
+    </div>
+
+    <!-- Feedback Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b">
+            <h2 class="text-xl font-semibold text-gray-900">Detailed Feedback Report</h2>
+            <p class="text-sm text-gray-600 mt-1">All feedback submissions with student and faculty details</p>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Knowledge</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teaching</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Communication</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Behavior</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Overall</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for feedback in feedback_list %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ feedback.created_at[:10] }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {{ feedback.student_name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ feedback.student_department }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {{ feedback.faculty_name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ feedback.faculty_subject }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="text-sm font-medium text-gray-900 mr-2">{{ feedback.performance }}</span>
+                                <div class="flex">
+                                    {% for i in range(5) %}
+                                        {% if i < feedback.performance %}
+                                            <span class="text-yellow-400">★</span>
+                                        {% else %}
+                                            <span class="text-gray-300">★</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="text-sm font-medium text-gray-900 mr-2">{{ feedback.knowledge }}</span>
+                                <div class="flex">
+                                    {% for i in range(5) %}
+                                        {% if i < feedback.knowledge %}
+                                            <span class="text-yellow-400">★</span>
+                                        {% else %}
+                                            <span class="text-gray-300">★</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="text-sm font-medium text-gray-900 mr-2">{{ feedback.teaching_skills }}</span>
+                                <div class="flex">
+                                    {% for i in range(5) %}
+                                        {% if i < feedback.teaching_skills %}
+                                            <span class="text-yellow-400">★</span>
+                                        {% else %}
+                                            <span class="text-gray-300">★</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="text-sm font-medium text-gray-900 mr-2">{{ feedback.communication }}</span>
+                                <div class="flex">
+                                    {% for i in range(5) %}
+                                        {% if i < feedback.communication %}
+                                            <span class="text-yellow-400">★</span>
+                                        {% else %}
+                                            <span class="text-gray-300">★</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="text-sm font-medium text-gray-900 mr-2">{{ feedback.behavior }}</span>
+                                <div class="flex">
+                                    {% for i in range(5) %}
+                                        {% if i < feedback.behavior %}
+                                            <span class="text-yellow-400">★</span>
+                                        {% else %}
+                                            <span class="text-gray-300">★</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="text-lg font-bold {% if (feedback.performance + feedback.knowledge + feedback.teaching_skills + feedback.communication + feedback.behavior) / 5 >= 4 %}text-green-600{% elif (feedback.performance + feedback.knowledge + feedback.teaching_skills + feedback.communication + feedback.behavior) / 5 >= 3 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                                    {{ "%.1f"|format((feedback.performance + feedback.knowledge + feedback.teaching_skills + feedback.communication + feedback.behavior) / 5) }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                            {% if feedback.comments %}
+                                <div class="truncate" title="{{ feedback.comments }}">
+                                    {{ feedback.comments[:50] }}{% if feedback.comments|length > 50 %}...{% endif %}
+                                </div>
+                            {% else %}
+                                <span class="text-gray-400">No comments</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Department Analysis -->
+    <div class="mt-8 bg-gray-50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Department Analysis</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="font-semibold text-gray-700 mb-2">Student Departments:</h4>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    {% for dept in feedback_list|map(attribute='student_department')|unique|list %}
+                        <li>• {{ dept }} ({{ feedback_list|selectattr('student_department', 'equalto', dept)|list|length }} feedback)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-700 mb-2">Faculty Departments:</h4>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    {% for dept in feedback_list|map(attribute='faculty_department')|unique|list %}
+                        <li>• {{ dept }} ({{ feedback_list|selectattr('faculty_department', 'equalto', dept)|list|length }} feedback)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-blue-800 mb-3">Data Export</h3>
+        <p class="text-sm text-blue-700 mb-4">
+            This page shows all feedback data with student and faculty details. For privacy reasons, 
+            individual student feedback is not exported, but aggregated reports are available in the main dashboard.
+        </p>
+        <div class="flex space-x-4">
+            <a href="{{ url_for('admin_dashboard') }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                View Faculty Reports
+            </a>
+            <button onclick="window.print()" 
+                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                Print Report
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
