@@ -7,9 +7,7 @@
     <!-- Faculty Info Header -->
     <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-xl p-6 mb-8">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-white mb-2">
-                Faculty Feedback Form
-            </h1>
+            <h1 class="text-3xl font-bold text-white mb-2">Faculty Feedback Form</h1>
             <div class="bg-white bg-opacity-20 rounded-lg p-4 mt-4">
                 <h2 class="text-xl font-semibold text-white mb-2">{{ faculty.name }}</h2>
                 <p class="text-blue-100 mb-1">{{ faculty.subject }}</p>
@@ -21,7 +19,8 @@
     <!-- Feedback Form -->
     <div class="bg-white rounded-lg shadow-md p-8">
         <form method="POST" action="{{ url_for('submit_feedback', faculty_id=faculty.id) }}" id="feedbackForm">
-            <!-- Performance Rating -->
+
+            <!-- 1. Performance -->
             <div class="mb-8">
                 <label class="block text-lg font-semibold text-gray-900 mb-4">
                     1. Performance - Overall teaching effectiveness
@@ -34,16 +33,9 @@
                     <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'performance')">★</span>
                 </div>
                 <input type="hidden" name="performance" value="" required>
-                <div class="text-center text-sm text-gray-600">
-                    <span class="mr-4">1 - Poor</span>
-                    <span class="mr-4">2 - Below Average</span>
-                    <span class="mr-4">3 - Average</span>
-                    <span class="mr-4">4 - Good</span>
-                    <span>5 - Excellent</span>
-                </div>
             </div>
 
-            <!-- Knowledge Rating -->
+            <!-- 2. Knowledge -->
             <div class="mb-8">
                 <label class="block text-lg font-semibold text-gray-900 mb-4">
                     2. Knowledge - Subject matter expertise
@@ -56,16 +48,9 @@
                     <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'knowledge')">★</span>
                 </div>
                 <input type="hidden" name="knowledge" value="" required>
-                <div class="text-center text-sm text-gray-600">
-                    <span class="mr-4">1 - Poor</span>
-                    <span class="mr-4">2 - Below Average</span>
-                    <span class="mr-4">3 - Average</span>
-                    <span class="mr-4">4 - Good</span>
-                    <span>5 - Excellent</span>
-                </div>
             </div>
 
-            <!-- Teaching Skills Rating -->
+            <!-- 3. Teaching Skills -->
             <div class="mb-8">
                 <label class="block text-lg font-semibold text-gray-900 mb-4">
                     3. Teaching Skills - Instructional methods and techniques
@@ -78,16 +63,9 @@
                     <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'teaching_skills')">★</span>
                 </div>
                 <input type="hidden" name="teaching_skills" value="" required>
-                <div class="text-center text-sm text-gray-600">
-                    <span class="mr-4">1 - Poor</span>
-                    <span class="mr-4">2 - Below Average</span>
-                    <span class="mr-4">3 - Average</span>
-                    <span class="mr-4">4 - Good</span>
-                    <span>5 - Excellent</span>
-                </div>
             </div>
 
-            <!-- Communication Rating -->
+            <!-- 4. Communication -->
             <div class="mb-8">
                 <label class="block text-lg font-semibold text-gray-900 mb-4">
                     4. Communication - Clarity and explanation of concepts
@@ -100,16 +78,9 @@
                     <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'communication')">★</span>
                 </div>
                 <input type="hidden" name="communication" value="" required>
-                <div class="text-center text-sm text-gray-600">
-                    <span class="mr-4">1 - Poor</span>
-                    <span class="mr-4">2 - Below Average</span>
-                    <span class="mr-4">3 - Average</span>
-                    <span class="mr-4">4 - Good</span>
-                    <span>5 - Excellent</span>
-                </div>
             </div>
 
-            <!-- Behavior Rating -->
+            <!-- 5. Behavior -->
             <div class="mb-8">
                 <label class="block text-lg font-semibold text-gray-900 mb-4">
                     5. Behavior - Professional conduct and attitude
@@ -122,35 +93,88 @@
                     <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'behavior')">★</span>
                 </div>
                 <input type="hidden" name="behavior" value="" required>
-                <div class="text-center text-sm text-gray-600">
-                    <span class="mr-4">1 - Poor</span>
-                    <span class="mr-4">2 - Below Average</span>
-                    <span class="mr-4">3 - Average</span>
-                    <span class="mr-4">4 - Good</span>
-                    <span>5 - Excellent</span>
-                </div>
             </div>
 
-            <!-- Comments Section -->
+            <!-- 6. Class Management -->
+            <div class="mb-8">
+                <label class="block text-lg font-semibold text-gray-900 mb-4">
+                    6. Class Management - Ability to maintain discipline and manage class time effectively
+                </label>
+                <div class="flex justify-center space-x-2 mb-4" data-field="class_management">
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(1, 'class_management')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(2, 'class_management')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(3, 'class_management')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(4, 'class_management')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'class_management')">★</span>
+                </div>
+                <input type="hidden" name="class_management" value="" required>
+            </div>
+
+            <!-- 7. Use of Technology -->
+            <div class="mb-8">
+                <label class="block text-lg font-semibold text-gray-900 mb-4">
+                    7. Use of Technology - Effective use of digital tools and teaching aids
+                </label>
+                <div class="flex justify-center space-x-2 mb-4" data-field="technology_use">
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(1, 'technology_use')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(2, 'technology_use')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(3, 'technology_use')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(4, 'technology_use')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'technology_use')">★</span>
+                </div>
+                <input type="hidden" name="technology_use" value="" required>
+            </div>
+
+            <!-- 8. Punctuality -->
+            <div class="mb-8">
+                <label class="block text-lg font-semibold text-gray-900 mb-4">
+                    8. Punctuality - Timeliness in class start and completion of syllabus
+                </label>
+                <div class="flex justify-center space-x-2 mb-4" data-field="punctuality">
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(1, 'punctuality')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(2, 'punctuality')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(3, 'punctuality')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(4, 'punctuality')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'punctuality')">★</span>
+                </div>
+                <input type="hidden" name="punctuality" value="" required>
+            </div>
+
+            <!-- 9. Student Engagement -->
+            <div class="mb-8">
+                <label class="block text-lg font-semibold text-gray-900 mb-4">
+                    9. Student Engagement - Encourages participation and interaction in class
+                </label>
+                <div class="flex justify-center space-x-2 mb-4" data-field="student_engagement">
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(1, 'student_engagement')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(2, 'student_engagement')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(3, 'student_engagement')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(4, 'student_engagement')">★</span>
+                    <span class="star text-3xl cursor-pointer empty" onclick="setRating(5, 'student_engagement')">★</span>
+                </div>
+                <input type="hidden" name="student_engagement" value="" required>
+            </div>
+
+            <!-- 10. Comments -->
             <div class="mb-8">
                 <label for="comments" class="block text-lg font-semibold text-gray-900 mb-4">
-                    6. Additional Comments (Optional)
+                    10. Additional Comments (Optional)
                 </label>
-                <textarea id="comments" name="comments" rows="6" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Please provide any additional feedback, suggestions, or comments about the faculty member's teaching..."></textarea>
+                <textarea id="comments" name="comments" rows="6"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Please provide any additional feedback, suggestions, or comments about the faculty member's teaching..."></textarea>
                 <p class="text-sm text-gray-500 mt-2">
                     Your comments will be anonymous and help improve teaching quality.
                 </p>
             </div>
 
-            <!-- Submit Button -->
+            <!-- Submit -->
             <div class="flex justify-center space-x-4">
-                <a href="{{ url_for('student_dashboard') }}" 
+                <a href="{{ url_for('student_dashboard') }}"
                    class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-md font-medium transition duration-200">
                     Cancel
                 </a>
-                <button type="submit" 
+                <button type="submit"
                         class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium transition duration-200">
                     Submit Feedback
                 </button>
@@ -188,9 +212,12 @@ function setRating(rating, fieldName) {
 
 // Form validation
 document.getElementById('feedbackForm').addEventListener('submit', function(e) {
-    const requiredFields = ['performance', 'knowledge', 'teaching_skills', 'communication', 'behavior'];
+    const requiredFields = [
+        'performance', 'knowledge', 'teaching_skills', 'communication', 'behavior',
+        'class_management', 'technology_use', 'punctuality', 'student_engagement'
+    ];
     let isValid = true;
-    
+
     requiredFields.forEach(field => {
         const value = document.querySelector(`input[name="${field}"]`).value;
         if (!value) {
@@ -198,20 +225,16 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
             alert(`Please rate ${field.replace('_', ' ')} before submitting.`);
         }
     });
-    
+
     if (!isValid) {
         e.preventDefault();
         return false;
     }
-    
-    // Confirm submission
+
     if (!confirm('Are you sure you want to submit this feedback? You cannot modify it after submission.')) {
         e.preventDefault();
         return false;
     }
-    
-    return true;
 });
 </script>
 {% endblock %}
-
