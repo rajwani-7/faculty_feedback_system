@@ -4,170 +4,101 @@
 
 {% block content %}
 <div class="px-4 py-6 sm:px-0">
-    <!-- Welcome Section -->
+    <!-- Student Header -->
     <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-xl p-6 mb-8">
         <div class="text-center">
             <h1 class="text-3xl font-bold text-white mb-2">
                 Welcome, {{ session.user_name }}!
             </h1>
             <p class="text-blue-100 mb-4">
-                Department: {{ student_department }}
+                Your Department: {{ student_department }}
             </p>
-            <p class="text-blue-100">
-                Select a faculty member to provide anonymous feedback
-            </p>
+            <a href="{{ url_for('logout') }}" 
+               class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50 transition duration-300">
+                Logout
+            </a>
         </div>
     </div>
 
-    <!-- Department Faculty Section -->
+    <!-- Faculty from Your Department -->
     {% if department_faculty %}
-    <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">
-            Faculty in Your Department ({{ student_department }})
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="px-6 py-4 bg-gray-50 border-b">
+            <h2 class="text-xl font-semibold text-gray-900">Faculty in Your Department ({{ student_department }})</h2>
+            <p class="text-sm text-gray-600 mt-1">Select a faculty member to provide feedback</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
             {% for faculty in department_faculty %}
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
-                <div class="text-center">
-                    <div class="bg-blue-100 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-200">
+                <img class="h-20 w-20 rounded-full object-cover mb-3" 
+                     src="{{ url_for('static', filename='faculty_images/' + (faculty.image or 'default.png')) }}" 
+                     alt="{{ faculty.name }}"
+                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='faculty_images/default.png') }}';">
+                <h3 class="text-lg font-semibold text-gray-900">{{ faculty.name }}</h3>
+                <p class="text-sm text-gray-600">{{ faculty.subject }}</p>
+                <p class="text-xs text-gray-500 mb-4">{{ faculty.department }}</p>
+                
+                <!-- Star Rating -->
+                <div class="flex items-center mb-4">
+                    <div class="flex">
+                        {% for i in range(5) %}
+                            {% if i < faculty.overall_average|round(0, 'floor')|int %}
+                                <span class="text-yellow-400">★</span>
+                            {% else %}
+                                <span class="text-gray-300">★</span>
+                            {% endif %}
+                        {% endfor %}
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ faculty.name }}</h3>
-                    <p class="text-sm text-gray-600 mb-2">{{ faculty.subject }}</p>
-                    <p class="text-xs text-gray-500 mb-3">{{ faculty.department }}</p>
-                    
-                    <!-- Faculty Rating Display -->
-                    {% if faculty.total_feedback > 0 %}
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                        <div class="text-sm font-semibold text-gray-700 mb-2">Current Rating</div>
-                        <div class="flex items-center justify-center mb-2">
-                            <span class="text-2xl font-bold {% if faculty.overall_average >= 4 %}text-green-600{% elif faculty.overall_average >= 3 %}text-yellow-600{% else %}text-red-600{% endif %}">
-                                {{ faculty.overall_average }}
-                            </span>
-                            <div class="ml-2 flex">
-                                {% for i in range(5) %}
-                                    {% if i < faculty.overall_average %}
-                                        <span class="text-yellow-400">★</span>
-                                    {% else %}
-                                        <span class="text-gray-300">★</span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-500">{{ faculty.total_feedback }} feedback</div>
-                    </div>
-                    {% else %}
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                        <div class="text-sm text-gray-500">No ratings yet</div>
-                    </div>
-                    {% endif %}
-                    
-                    <a href="{{ url_for('feedback_form', faculty_id=faculty.id) }}" 
-                       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200">
-                        Give Feedback
-                    </a>
+                    <span class="text-xs text-gray-500 ml-2">({{ faculty.total_feedback }} reviews)</span>
                 </div>
+
+                <a href="{{ url_for('feedback_form', faculty_id=faculty.id) }}" 
+                   class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200">
+                    Give Feedback
+                </a>
             </div>
             {% endfor %}
         </div>
     </div>
     {% endif %}
 
-    <!-- All Faculty Section -->
-    <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">
-            All Faculty Members
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- All Faculty List -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b">
+            <h2 class="text-xl font-semibold text-gray-900">All Faculty Members</h2>
+            <p class="text-sm text-gray-600 mt-1">Browse all faculty members across departments</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
             {% for faculty in faculty_list %}
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
-                <div class="text-center">
-                    <div class="bg-gray-100 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-200">
+                <img class="h-20 w-20 rounded-full object-cover mb-3" 
+                     src="{{ url_for('static', filename='faculty_images/' + (faculty.image or 'default.png')) }}" 
+                     alt="{{ faculty.name }}"
+                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='faculty_images/default.png') }}';">
+                <h3 class="text-lg font-semibold text-gray-900">{{ faculty.name }}</h3>
+                <p class="text-sm text-gray-600">{{ faculty.subject }}</p>
+                <p class="text-xs text-gray-500 mb-4">{{ faculty.department }}</p>
+
+                <!-- Star Rating -->
+                <div class="flex items-center mb-4">
+                    <div class="flex">
+                        {% for i in range(5) %}
+                            {% if i < faculty.overall_average|round(0, 'floor')|int %}
+                                <span class="text-yellow-400">★</span>
+                            {% else %}
+                                <span class="text-gray-300">★</span>
+                            {% endif %}
+                        {% endfor %}
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ faculty.name }}</h3>
-                    <p class="text-sm text-gray-600 mb-2">{{ faculty.subject }}</p>
-                    <p class="text-xs text-gray-500 mb-3">{{ faculty.department }}</p>
-                    
-                    <!-- Faculty Rating Display -->
-                    {% if faculty.total_feedback > 0 %}
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                        <div class="text-sm font-semibold text-gray-700 mb-2">Current Rating</div>
-                        <div class="flex items-center justify-center mb-2">
-                            <span class="text-2xl font-bold {% if faculty.overall_average >= 4 %}text-green-600{% elif faculty.overall_average >= 3 %}text-yellow-600{% else %}text-red-600{% endif %}">
-                                {{ faculty.overall_average }}
-                            </span>
-                            <div class="ml-2 flex">
-                                {% for i in range(5) %}
-                                    {% if i < faculty.overall_average %}
-                                        <span class="text-yellow-400">★</span>
-                                    {% else %}
-                                        <span class="text-gray-300">★</span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-500">{{ faculty.total_feedback }} feedback</div>
-                    </div>
-                    {% else %}
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                        <div class="text-sm text-gray-500">No ratings yet</div>
-                    </div>
-                    {% endif %}
-                    
-                    <a href="{{ url_for('feedback_form', faculty_id=faculty.id) }}" 
-                       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200">
-                        Give Feedback
-                    </a>
+                    <span class="text-xs text-gray-500 ml-2">({{ faculty.total_feedback }} reviews)</span>
                 </div>
+
+                <a href="{{ url_for('feedback_form', faculty_id=faculty.id) }}" 
+                   class="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200">
+                    Give Feedback
+                </a>
             </div>
             {% endfor %}
-        </div>
-    </div>
-
-    <!-- Instructions Section -->
-    <div class="bg-green-50 border border-green-200 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-green-800 mb-3">Feedback Guidelines</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <h4 class="font-semibold text-green-700 mb-2">Rating Scale:</h4>
-                <ul class="text-sm text-green-600 space-y-1">
-                    <li>• 5 - Excellent</li>
-                    <li>• 4 - Good</li>
-                    <li>• 3 - Average</li>
-                    <li>• 2 - Below Average</li>
-                    <li>• 1 - Poor</li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-semibold text-green-700 mb-2">Important Notes:</h4>
-                <ul class="text-sm text-green-600 space-y-1">
-                    <li>• Your feedback is completely anonymous</li>
-                    <li>• You can only submit one feedback per faculty</li>
-                    <li>• Be honest and constructive</li>
-                    <li>• Help improve teaching quality</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-lg shadow-md p-6 text-center">
-            <div class="text-2xl font-bold text-blue-600 mb-2">{{ faculty_list|length }}</div>
-            <div class="text-sm text-gray-600">Total Faculty</div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md p-6 text-center">
-            <div class="text-2xl font-bold text-green-600 mb-2">{{ department_faculty|length if department_faculty else 0 }}</div>
-            <div class="text-sm text-gray-600">In Your Department</div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md p-6 text-center">
-            <div class="text-2xl font-bold text-purple-600 mb-2">Anonymous</div>
-            <div class="text-sm text-gray-600">Feedback System</div>
         </div>
     </div>
 </div>

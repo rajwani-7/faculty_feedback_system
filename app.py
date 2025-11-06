@@ -5,8 +5,13 @@ This is the main application file containing all routes and business logic.
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from functools import wraps
+from werkzeug.utils import secure_filename
 from models import student_model, faculty_model, feedback_model
 import os
+
+# Configuration for file uploads
+UPLOAD_FOLDER = 'static/faculty_images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -16,6 +21,11 @@ app.secret_key = 'your-secret-key-change-in-production'  # Change this in produc
 ADMIN_EMAIL = 'admin@college.com'
 ADMIN_PASSWORD = 'admin123'
 
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def login_required(f):
     """Decorator to require login for protected routes"""
@@ -267,14 +277,28 @@ def add_faculty():
         name = request.form.get('name')
         department = request.form.get('department')
         subject = request.form.get('subject')
+        image_file = request.files.get('image')
         
         # Basic validation
         if not all([name, department, subject]):
             flash('All fields are required.', 'error')
             return render_template('add_faculty.html')
         
+        image_filename = None
+        if image_file and image_file.filename != '':
+            if allowed_file(image_file.filename):
+                image_filename = secure_filename(image_file.filename)
+                # Ensure unique filenames to prevent overwrites
+                from datetime import datetime
+                now = datetime.now().strftime("%Y%m%d%H%M%S")
+                image_filename = f"{now}_{image_filename}"
+                image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            else:
+                flash('Invalid image format. Please use PNG, JPG, or JPEG.', 'error')
+                return render_template('add_faculty.html')
+
         # Add faculty
-        if faculty_model.create(name, department, subject):
+        if faculty_model.create(name, department, subject, image_filename):
             flash('Faculty added successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
@@ -303,22 +327,73 @@ def view_feedback(faculty_id):
                          averages=averages)
 
 
+@app.route('/update_faculty/<int:faculty_id>', methods=['POST'])
+@admin_required
+def update_faculty(faculty_id):
+    """Update faculty details"""
+    faculty = faculty_model.get_by_id(faculty_id)
+    if not faculty:
+        return jsonify({'success': False, 'message': 'Faculty not found.'}), 404
+
+    name = request.form.get('name')
+    department = request.form.get('department')
+    subject = request.form.get('subject')
+
+    if not all([name, department, subject]):
+        return jsonify({'success': False, 'message': 'All fields are required.'}), 400
+
+    image_file = request.files.get('image')
+    image_filename = faculty.get('image') # Keep old image by default
+    image_updated = False
+
+    if image_file and image_file.filename != '':
+        if allowed_file(image_file.filename):
+            # Delete old image if it exists
+            if faculty.get('image') and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], faculty['image'])):
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], faculty['image']))
+            
+            new_filename = secure_filename(image_file.filename)
+            from datetime import datetime
+            now = datetime.now().strftime("%Y%m%d%H%M%S")
+            image_filename = f"{now}_{new_filename}"
+            image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            image_updated = True
+        else:
+            return jsonify({'success': False, 'message': 'Invalid image format. Please use PNG, JPG, or JPEG.'}), 400
+
+    # Update faculty in database (image_filename will be new or original)
+    faculty_model.update(faculty_id, name, department, subject, image_filename)
+    
+    # Get updated faculty data to return
+    updated_faculty = faculty_model.get_by_id(faculty_id)
+    if updated_faculty.get('image'):
+        updated_faculty['image_url'] = url_for('static', filename=f'faculty_images/{updated_faculty["image"]}')
+    
+    return jsonify({'success': True, 'message': 'Faculty updated successfully!', 'faculty': updated_faculty})
+
 @app.route('/delete_faculty/<int:faculty_id>', methods=['POST'])
 @admin_required
 def delete_faculty(faculty_id):
-    """Delete faculty member and all associated feedback"""
+    """Delete a faculty member and all associated feedback"""
     faculty = faculty_model.get_by_id(faculty_id)
     if not faculty:
-        flash('Faculty not found.', 'error')
-        return redirect(url_for('admin_dashboard'))
-    
+        return jsonify({'success': False, 'message': 'Faculty not found.'}), 404
+
+    # Delete associated image file
+    image_filename = faculty.get('image')
+    if image_filename:
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
     # Delete faculty and all associated feedback
     if faculty_model.delete(faculty_id):
-        flash(f'Faculty "{faculty["name"]}" and all associated feedback have been deleted successfully.', 'success')
+        flash(f'Faculty "{faculty["name"]}" and all associated feedback have been deleted.', 'success')
+        return jsonify({'success': True, 'message': f'Faculty "{faculty["name"]}" deleted successfully.'})
     else:
         flash('Error deleting faculty. Please try again.', 'error')
-    
-    return redirect(url_for('admin_dashboard'))
+        return jsonify({'success': False, 'message': 'Error deleting faculty.'}), 500
+
 
 
 @app.route('/all_feedback')
@@ -345,7 +420,10 @@ def internal_error(error):
 if __name__ == '__main__':
     # Create database tables on startup
     from models import db
-    
+
+    # Create upload folder if it doesn't exist
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
     # Add some sample faculty data if database is empty
     faculty_list = faculty_model.get_all()
     if not faculty_list:

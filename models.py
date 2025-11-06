@@ -46,6 +46,7 @@ class Database:
                 name TEXT NOT NULL,
                 department TEXT NOT NULL,
                 subject TEXT NOT NULL,
+                image TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -129,15 +130,15 @@ class Faculty:
     def __init__(self, db):
         self.db = db
     
-    def create(self, name, department, subject):
+    def create(self, name, department, subject, image=None):
         """Create a new faculty member"""
         conn = self.db.get_connection()
         cursor = conn.cursor()
         
         cursor.execute('''
-            INSERT INTO Faculty (name, department, subject)
-            VALUES (?, ?, ?)
-        ''', (name, department, subject))
+            INSERT INTO Faculty (name, department, subject, image)
+            VALUES (?, ?, ?, ?)
+        ''', (name, department, subject, image))
         conn.commit()
         conn.close()
         return True
@@ -174,6 +175,20 @@ class Faculty:
         conn.close()
         
         return [dict(f) for f in faculty]
+
+    def update(self, faculty_id, name, department, subject, image=None):
+        """Update a faculty member's details"""
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        
+        # This single query handles all cases.
+        # If `image` is a new filename, it's updated.
+        # If `image` is the old filename (or None), it remains unchanged or is set to None.
+        cursor.execute('UPDATE Faculty SET name = ?, department = ?, subject = ?, image = ? WHERE id = ?',
+                       (name, department, subject, image, faculty_id))
+        conn.commit()
+        conn.close()
+        return True
     
     def delete(self, faculty_id):
         """Delete faculty member and all associated feedback"""

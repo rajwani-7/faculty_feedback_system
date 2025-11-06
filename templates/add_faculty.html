@@ -14,7 +14,7 @@
             </p>
         </div>
         
-        <form class="mt-8 space-y-6" method="POST" id="addFacultyForm">
+        <form class="mt-8 space-y-6" method="POST" id="addFacultyForm" enctype="multipart/form-data">
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
                     <label for="name" class="sr-only">Faculty Name</label>
@@ -44,8 +44,14 @@
                 <div>
                     <label for="subject" class="sr-only">Subject</label>
                     <input id="subject" name="subject" type="text" required 
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" 
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" 
                            placeholder="Subject/Course (e.g., Data Structures)">
+                </div>
+                <div>
+                    <label for="image" class="sr-only">Faculty Image</label>
+                    <input id="image" name="image" type="file" accept=".png, .jpg, .jpeg"
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                           placeholder="Faculty Image (Optional)">
                 </div>
             </div>
 
@@ -140,4 +146,3 @@ document.getElementById('addFacultyForm').addEventListener('submit', function(e)
 });
 </script>
 {% endblock %}
-
